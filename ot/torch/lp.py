@@ -80,7 +80,7 @@ class GromovWassersteinLossFunction(Function):
         grad_T = T
 
         ctx.save_for_backward(grad_p, grad_q, grad_T)
-        return torch.sum(T * M) ##TODO Replace M, do something about this.
+        return torch.sum(T) ##TODO do something about this.Doesn't seem correct.
 
     @staticmethod
     def backward(ctx, grad_output):
