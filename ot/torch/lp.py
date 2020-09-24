@@ -5,7 +5,7 @@
 import numpy as np
 import torch
 from torch.autograd import Function
-from .. import emd
+from .. import emd,gromov_wasserstein
 
 
 # Author: Remi Flamary <remi.flamary@unice.fr>
@@ -55,10 +55,57 @@ class OptimalTransportLossFunction(Function):
 
         return grad_a, grad_b, grad_M, None  # last one is param
 
+class GromovWassersteinLossFunction(Function):
+    """Return GW Loss for input (C1,C2,p,q) """
+
+    @staticmethod
+    # bias is an optional argument
+    def forward(ctx, C1,C2,p,q, num_iter_max=100000,armijo=True):
+
+        # convert to numpy
+        C1 = C1.detach().cpu().numpy().astype(np.float64)
+        C2 = C2.detach().cpu().numpy().astype(np.float64)
+        p = p.detach().cpu().numpy().astype(np.float64)
+        q = q.detach().cpu().numpy().astype(np.float64)
+
+        # project on simplex for float64 or else numerical errors
+        p /= p.sum()
+        q /= q.sum()
+
+        T, log = gromov_wasserstein(C1,C2,p,q, log=True, max_iter=num_iter_max,armijo=armijo)
+
+        T = torch.from_numpy(T).type_as(C1)
+        grad_p = torch.from_numpy(log['u']).type_as(p)
+        grad_q = torch.from_numpy(log['v']).type_as(q)
+        grad_T = T
+
+        ctx.save_for_backward(grad_p, grad_q, grad_T)
+        return torch.sum(T * M) ##TODO Replace M, do something about this.
+
+    @staticmethod
+    def backward(ctx, grad_output):
+
+        grad_p0, grad_q0, grad_T0 = ctx.saved_tensors
+        grad_p = grad_q = grad_T = None
+
+        if ctx.needs_input_grad[0]:
+            grad_p = grad_p0
+        if ctx.needs_input_grad[1]:
+            grad_q = grad_q0
+        if ctx.needs_input_grad[2]:
+            grad_T = grad_T0
+
+        return grad_p, grad_q, grad_T, None ,None # last two are param
+
 
 def ot_loss(a, b, M, num_iter_max=100000):
     """loss=emd2(a,b,M)"""
     return OptimalTransportLossFunction.apply(a, b, M, num_iter_max)
+
+
+def otgw_loss(C1,C2,p,q,num_iter_max=100000,armijo=True):
+    """loss=gromov_wasserstein(C1,C2,p,q)"""
+    return OptimalTransportLossFunction.apply(C1,C2,p,q,num_iter_max,armijo)
 
 
 def ot_solve(a, b, M, num_iter_max=100000, log=False):
