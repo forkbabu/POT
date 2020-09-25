@@ -132,9 +132,8 @@ def ot_solve(a, b, M, num_iter_max=100000, log=False):
         G = emd(a2, b2, M2, log=False, numItermax=num_iter_max)
 
         return torch.from_numpy(G).type_as(M)
-    #C1,C2,p,q,num_iter_max=100000,armijo=True):
     
-def otgw_solve(C1,C2,p,q, num_iter_max=100000):
+def otgw_solve(C1,C2,p,q, num_iter_max=100000.func='kl_loss'):
 
     C1 = C1.detach().cpu().numpy().astype(np.float64)
     C2 = C2.detach().cpu().numpy().astype(np.float64)
@@ -145,6 +144,6 @@ def otgw_solve(C1,C2,p,q, num_iter_max=100000):
     q /= q.sum()
 
 
-    T = gromov_wasserstein(C1,C2,p,q, log=False, max_iter=num_iter_max,armijo=True)
+    T = gromov_wasserstein(C1,C2,p,q, log=False, max_iter=num_iter_max,armijo=True,loss_fun=func)
 
     return torch.from_numpy(T)
