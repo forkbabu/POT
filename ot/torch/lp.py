@@ -145,6 +145,6 @@ def otgw_solve(C1,C2,p,q, num_iter_max=100000):
     b2 /= b2.sum()
 
 
-    T = gromov_wasserstein(C1,C2,p,q, log=False, max_iter=num_iter_max,armijo=armijo)
+    T = gromov_wasserstein(C1,C2,p,q, log=False, max_iter=num_iter_max,armijo=True)
 
     return torch.from_numpy(T)
