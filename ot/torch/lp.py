@@ -60,7 +60,7 @@ class GromovWassersteinLossFunction(Function):
 
     @staticmethod
     # bias is an optional argument
-    def forward(ctx, C1,C2,p,q, num_iter_max=100000,armijo=True):
+    def forward(ctx, C1,C2,p,q):
 
         # convert to numpy
         C1 = C1.detach().cpu().numpy().astype(np.float64)
@@ -72,30 +72,24 @@ class GromovWassersteinLossFunction(Function):
         p /= p.sum()
         q /= q.sum()
 
-        T, log = gromov_wasserstein(C1,C2,p,q, log=True, max_iter=num_iter_max,armijo=armijo)
+        T= gromov_wasserstein(C1,C2,p,q, log=False)
 
-        T = torch.from_numpy(T).type_as(C1)
-        grad_p = torch.from_numpy(log['u']).type_as(p)
-        grad_q = torch.from_numpy(log['v']).type_as(q)
+        T = torch.from_numpy(T)
         grad_T = T
 
-        ctx.save_for_backward(grad_p, grad_q, grad_T)
-        return torch.sum(T) ##TODO do something about this.Doesn't seem correct.
+        ctx.save_for_backward(grad_T)
+        return torch.sum(T) 
 
     @staticmethod
     def backward(ctx, grad_output):
 
-        grad_p0, grad_q0, grad_T0 = ctx.saved_tensors
-        grad_p = grad_q = grad_T = None
+        grad_T0 = ctx.saved_tensors
+        grad_T = None
 
         if ctx.needs_input_grad[0]:
-            grad_p = grad_p0
-        if ctx.needs_input_grad[1]:
-            grad_q = grad_q0
-        if ctx.needs_input_grad[2]:
             grad_T = grad_T0
 
-        return grad_p, grad_q, grad_T, None ,None # last two are param
+        return grad_T
 
 
 def ot_loss(a, b, M, num_iter_max=100000):
@@ -103,9 +97,9 @@ def ot_loss(a, b, M, num_iter_max=100000):
     return OptimalTransportLossFunction.apply(a, b, M, num_iter_max)
 
 
-def otgw_loss(C1,C2,p,q,num_iter_max=100000,armijo=True):
+def otgw_loss(C1,C2,p,q):
     """loss=gromov_wasserstein(C1,C2,p,q)"""
-    return GromovWassersteinLossFunction.apply(C1,C2,p,q,num_iter_max,armijo)
+    return GromovWassersteinLossFunction.apply(C1,C2,p,q)
 
 
 def ot_solve(a, b, M, num_iter_max=100000, log=False):
