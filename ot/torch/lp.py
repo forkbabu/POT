@@ -133,7 +133,7 @@ def ot_solve(a, b, M, num_iter_max=100000, log=False):
 
         return torch.from_numpy(G).type_as(M)
     
-def otgw_solve(C1,C2,p,q, num_iter_max=100000.func='kl_loss'):
+def otgw_solve(C1,C2,p,q, num_iter_max=100000,func='kl_loss'):
 
     C1 = C1.detach().cpu().numpy().astype(np.float64)
     C2 = C2.detach().cpu().numpy().astype(np.float64)
