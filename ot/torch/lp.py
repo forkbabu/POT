@@ -60,7 +60,7 @@ class GromovWassersteinLossFunction(Function):
 
     @staticmethod
     # bias is an optional argument
-    def forward(ctx, C1,C2,p,q):
+    def forward(ctx, C1,C2,p,q,func='square_loss'):
 
         # convert to numpy
         C1 = C1.detach().cpu().numpy().astype(np.float64)
@@ -72,7 +72,7 @@ class GromovWassersteinLossFunction(Function):
         p /= p.sum()
         q /= q.sum()
 
-        T= gromov_wasserstein(C1,C2,p,q, log=False)
+        T= gromov_wasserstein(C1,C2,p,q, log=False,loss_fun=func)
 
         T = torch.from_numpy(T)
         grad_T = T
@@ -89,7 +89,7 @@ class GromovWassersteinLossFunction(Function):
         if ctx.needs_input_grad[0]:
             grad_T = grad_T0
 
-        return grad_T
+        return grad_T,None
 
 
 def ot_loss(a, b, M, num_iter_max=100000):
