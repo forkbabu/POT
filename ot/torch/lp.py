@@ -141,8 +141,8 @@ def otgw_solve(C1,C2,p,q, num_iter_max=100000):
     p = p.detach().cpu().numpy().astype(np.float64)
     q = q.detach().cpu().numpy().astype(np.float64)
     # project on simplex for float64 or else numerical errors
-    a2 /= a2.sum()
-    b2 /= b2.sum()
+    p /= p.sum()
+    q /= q.sum()
 
 
     T = gromov_wasserstein(C1,C2,p,q, log=False, max_iter=num_iter_max,armijo=True)
