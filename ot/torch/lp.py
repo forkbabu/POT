@@ -73,7 +73,7 @@ class GromovWassersteinLossFunction(Function):
         q /= q.sum()
 
         T= gromov_wasserstein2(C1,C2,p,q,loss_fun=func)
-
+        T = np.float32(T)
         T = torch.from_numpy(T)
         grad_T = T
 
