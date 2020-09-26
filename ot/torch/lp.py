@@ -89,7 +89,7 @@ class GromovWassersteinLossFunction(Function):
         if ctx.needs_input_grad[0]:
             grad_T = grad_T0
 
-        return grad_T,None,None,None
+        return grad_T,None
 
 
 def ot_loss(a, b, M, num_iter_max=100000):
