@@ -5,7 +5,7 @@
 import numpy as np
 import torch
 from torch.autograd import Function
-from .. import emd,gromov_wasserstein
+from .. import emd,gromov_wasserstein2
 
 
 # Author: Remi Flamary <remi.flamary@unice.fr>
@@ -72,7 +72,7 @@ class GromovWassersteinLossFunction(Function):
         p /= p.sum()
         q /= q.sum()
 
-        T= gromov_wasserstein(C1,C2,p,q, log=False,loss_fun=func)
+        T= gromov_wasserstein2(C1,C2,p,q,loss_fun=func)
 
         T = torch.from_numpy(T)
         grad_T = T
@@ -87,9 +87,8 @@ class GromovWassersteinLossFunction(Function):
         grad_T = None
 
         if ctx.needs_input_grad[0]:
-            grad_T = grad_T0[0]
-        print(grad_T.shape)
-        return grad_T,None,None,None
+            grad_T = grad_T0
+        return grad_T
 
 
 def ot_loss(a, b, M, num_iter_max=100000):
