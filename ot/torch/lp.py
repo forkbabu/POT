@@ -88,7 +88,7 @@ class GromovWassersteinLossFunction(Function):
 
         if ctx.needs_input_grad[0]:
             grad_T = grad_T0[0]
-        print('grad shape = %f' % grad_T.shape)
+        print('grad shape = %f' % str(grad_T.shape))
         return grad_T,None,None,None
 
 
