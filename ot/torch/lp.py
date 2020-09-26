@@ -89,7 +89,7 @@ class GromovWassersteinLossFunction(Function):
         if ctx.needs_input_grad[0]:
             grad_T = grad_T0
 
-        return grad_T,None
+        return grad_T
 
 
 def ot_loss(a, b, M, num_iter_max=100000):
@@ -138,6 +138,6 @@ def otgw_solve(C1,C2,p,q,func='kl_loss'):
     q /= q.sum()
 
 
-    T = gromov_wasserstein(C1,C2,p,q, log=False,armijo=False,loss_fun=func)
+    T = gromov_wasserstein(C1,C2,p,q, log=False,loss_fun=func)
 
     return torch.from_numpy(T)
